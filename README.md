@@ -94,13 +94,13 @@ Files are exposed using `file:///` URIs pointing to their absolute paths on disk
 ### CLI Usage
 
 ```
-utilMCP /path/to/folder [--monitor]
+utilMCP /path/to/folder [--debug]
 ```
 
 | Argument | Description |
 |---|---|
 | `/path/to/folder` | Required. The folder whose files to expose |
-| `--monitor` | Optional. Log all MCP requests and responses to stderr for debugging |
+| `--debug` | Optional. Log all MCP requests and responses to stderr for debugging |
 
 ## Minimal Features for Claude Desktop Compatibility
 
@@ -163,13 +163,13 @@ With monitoring enabled:
   "mcpServers": {
     "utilMCP": {
       "command": "/path/to/utilMCP",
-      "args": ["/path/to/folder/to/expose", "--monitor"]
+      "args": ["/path/to/folder/to/expose", "--debug"]
     }
   }
 }
 ```
 
-Claude Desktop will launch the binary as a subprocess and communicate over stdio. When `--monitor` is active, all JSON-RPC traffic is logged to stderr (visible in Claude Desktop's server logs at `~/Library/Logs/Claude/mcp-server-utilMCP.log`).
+Claude Desktop will launch the binary as a subprocess and communicate over stdio. When `--debug` is active, all JSON-RPC traffic is logged to stderr (visible in Claude Desktop's server logs at `~/Library/Logs/Claude/mcp-server-utilMCP.log`).
 
 ## License
 

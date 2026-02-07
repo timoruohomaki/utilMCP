@@ -17,5 +17,5 @@
 - **Directory scan**: flat (no recursion), binary and oversized files filtered out
 - **Manifest**: manifest.json generated on startup with name, mimeType, size, lastModified
 - **Resource URIs**: file:/// scheme with absolute paths
-- **CLI**: `utilMCP /path/to/folder [--monitor]`
+- **CLI**: `utilMCP /path/to/folder [--debug]`
 - **Logging**: all output to stderr only; stdout reserved for MCP protocol

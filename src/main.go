@@ -14,9 +14,9 @@ func main() {
 	log.SetOutput(os.Stderr)
 	log.SetFlags(log.Ltime)
 
-	monitor := flag.Bool("monitor", false, "Log all MCP requests and responses to stderr")
+	debug := flag.Bool("debug", false, "Log all MCP requests and responses to stderr")
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: utilMCP <folder> [--monitor]\n\n")
+		fmt.Fprintf(os.Stderr, "Usage: utilMCP <folder> [--debug]\n\n")
 		fmt.Fprintf(os.Stderr, "A read-only MCP server that exposes files in <folder> to AI applications.\n\n")
 		flag.PrintDefaults()
 	}
@@ -51,9 +51,9 @@ func main() {
 	log.Printf("Manifest written with %d file(s)", len(files))
 
 	// Create and start the MCP server.
-	s := NewUtilMCPServer(folder, files, *monitor)
+	s := NewUtilMCPServer(folder, files, *debug)
 
-	log.Printf("utilMCP server starting (folder=%s, monitor=%v)", folder, *monitor)
+	log.Printf("utilMCP server starting (folder=%s, debug=%v)", folder, *debug)
 	if err := server.ServeStdio(s); err != nil {
 		log.Fatalf("Server error: %v", err)
 	}

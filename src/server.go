@@ -14,19 +14,19 @@ import (
 
 // NewUtilMCPServer creates an MCP server that exposes files in folder as
 // read-only resources and tools.
-func NewUtilMCPServer(folder string, files []FileEntry, monitor bool) *server.MCPServer {
+func NewUtilMCPServer(folder string, files []FileEntry, debug bool) *server.MCPServer {
 	opts := []server.ServerOption{
 		server.WithResourceCapabilities(false, false),
 		server.WithToolCapabilities(false),
 	}
 
-	if monitor {
+	if debug {
 		hooks := &server.Hooks{}
 		hooks.AddBeforeCallTool(func(ctx context.Context, id any, message *mcp.CallToolRequest) {
-			log.Printf("[monitor] tool/call: %s args=%v", message.Params.Name, message.Params.Arguments)
+			log.Printf("[debug] tool/call: %s args=%v", message.Params.Name, message.Params.Arguments)
 		})
 		hooks.AddAfterCallTool(func(ctx context.Context, id any, message *mcp.CallToolRequest, result *mcp.CallToolResult) {
-			log.Printf("[monitor] tool/call result: isError=%v", result.IsError)
+			log.Printf("[debug] tool/call result: isError=%v", result.IsError)
 		})
 		opts = append(opts, server.WithHooks(hooks))
 	}
