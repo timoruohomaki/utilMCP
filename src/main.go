@@ -53,7 +53,7 @@ func main() {
 	// Create and start the MCP server.
 	s := NewUtilMCPServer(folder, files, *debug)
 
-	fmt.Fprintln(os.Stderr, `utilMCP - A read-only MCP server for AI applications.
+	fmt.Fprintf(os.Stderr, `utilMCP - A read-only MCP server for AI applications.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
