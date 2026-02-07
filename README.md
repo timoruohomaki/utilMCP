@@ -134,42 +134,125 @@ Since utilMCP is a read-only file server, it implements:
 - Streamable HTTP transport (stdio is sufficient for Claude Desktop)
 - Write operations (read-only by design)
 
+## Prerequisites
+
+- [Go 1.21+](https://go.dev/dl/)
+
 ## Building
+
+### macOS
 
 ```bash
 go build -o utilMCP ./src/
 go test ./src/
 ```
 
-## Claude Desktop Configuration
+### Windows 11
 
-To use utilMCP with Claude Desktop, add it to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+```powershell
+go build -o utilMCP.exe ./src/
+go test ./src/
+```
+
+## Installation
+
+### macOS
+
+1. Build the binary (see above).
+2. Move it to a location on your PATH, or note its absolute path:
+
+```bash
+# Option A: install to a standard location
+cp utilMCP /usr/local/bin/
+
+# Option B: use the absolute path directly in the config
+# e.g. /Users/yourname/projects/utilMCP/utilMCP
+```
+
+3. Edit the Claude Desktop configuration file:
+
+```bash
+# Create/open the config file
+open ~/Library/Application\ Support/Claude/claude_desktop_config.json
+```
+
+4. Add the server entry:
 
 ```json
 {
   "mcpServers": {
     "utilMCP": {
-      "command": "/path/to/utilMCP",
-      "args": ["/path/to/folder/to/expose"]
+      "command": "/usr/local/bin/utilMCP",
+      "args": ["/Users/yourname/Documents/my-files"]
     }
   }
 }
 ```
 
-With monitoring enabled:
+With debug logging:
 
 ```json
 {
   "mcpServers": {
     "utilMCP": {
-      "command": "/path/to/utilMCP",
-      "args": ["/path/to/folder/to/expose", "--debug"]
+      "command": "/usr/local/bin/utilMCP",
+      "args": ["/Users/yourname/Documents/my-files", "--debug"]
     }
   }
 }
 ```
 
-Claude Desktop will launch the binary as a subprocess and communicate over stdio. When `--debug` is active, all JSON-RPC traffic is logged to stderr (visible in Claude Desktop's server logs at `~/Library/Logs/Claude/mcp-server-utilMCP.log`).
+5. Restart Claude Desktop. Debug logs are written to `~/Library/Logs/Claude/mcp-server-utilMCP.log`.
+
+### Windows 11
+
+1. Build the binary (see above).
+2. Place `utilMCP.exe` in a known location, e.g. `C:\Tools\utilMCP.exe`.
+3. Edit the Claude Desktop configuration file:
+
+```powershell
+# Create/open the config file
+notepad "$env:APPDATA\Claude\claude_desktop_config.json"
+```
+
+4. Add the server entry (use forward slashes or escaped backslashes in JSON):
+
+```json
+{
+  "mcpServers": {
+    "utilMCP": {
+      "command": "C:/Tools/utilMCP.exe",
+      "args": ["C:/Users/yourname/Documents/my-files"]
+    }
+  }
+}
+```
+
+With debug logging:
+
+```json
+{
+  "mcpServers": {
+    "utilMCP": {
+      "command": "C:/Tools/utilMCP.exe",
+      "args": ["C:/Users/yourname/Documents/my-files", "--debug"]
+    }
+  }
+}
+```
+
+5. Restart Claude Desktop. Debug logs are written to `%APPDATA%\Claude\Logs\mcp-server-utilMCP.log`.
+
+### File Access Restrictions
+
+utilMCP uses `file:///` URIs to reference files on disk. Be aware of the following restrictions:
+
+- **The server can only read files that the running user has OS-level read permission for.** It runs as your user account, so standard file permissions apply.
+- **macOS**: if the exposed folder is in a protected location (Desktop, Documents, Downloads, iCloud Drive, or external volumes), macOS may prompt for permission or block access entirely. The simplest approach is to use a folder outside these protected areas, or grant Full Disk Access to the terminal/shell that launches the server (System Settings > Privacy & Security > Full Disk Access).
+- **Windows**: folders protected by Windows Security (e.g. `C:\Windows`, `C:\Program Files`) or OneDrive-managed paths may require elevated permissions or specific access grants.
+- **Paths with spaces** work correctly -- they are handled by the Go standard library and passed through as-is in the JSON config.
+- **Symlinks**: the server follows symlinks when reading files, but the resource URI will reflect the original (symlinked) path. Ensure the symlink target is also readable.
+- **Network paths** (UNC paths on Windows, NFS/SMB mounts on macOS) are not explicitly supported and may behave unpredictably.
 
 ## License
 
