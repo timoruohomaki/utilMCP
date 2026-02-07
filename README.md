@@ -66,7 +66,7 @@ An MCP server can expose three types of capabilities:
 - **Transport**: stdio only (local desktop use, no TLS/auth needed)
 - **Directory**: flat scan of the target folder (no recursion into subdirectories)
 - **Read-only**: no write operations; the server only exposes file contents
-- **File filtering**: binary files and excessively large files are skipped
+- **File filtering**: binary files and files over 10 MB are skipped
 
 ### manifest.json
 
@@ -113,15 +113,19 @@ To function as a valid MCP server that Claude Desktop can connect to, utilMCP mu
 
 ### Required Capabilities (for this project)
 
-Since utilMCP is a read-only file server, it needs:
+Since utilMCP is a read-only file server, it implements:
 
 - **`resources/list`** -- Return a list of available files in the configured folder
 - **`resources/read`** -- Return the contents of a requested file
+- **`tools/list`** -- Expose `list_files` and `read_file` tools
+- **`tools/call`** -- Execute tool calls and return results
 
-Optionally, to also allow the LLM to actively search/read files:
+### Exposed Tools
 
-- **`tools/list`** -- Expose tools like `read_file` or `list_files`
-- **`tools/call`** -- Execute a tool call and return results
+| Tool | Description |
+|---|---|
+| `list_files` | Returns the manifest (all available files with metadata) |
+| `read_file` | Reads and returns the contents of a file by name |
 
 ### What This Server Does NOT Need
 
@@ -129,6 +133,13 @@ Optionally, to also allow the LLM to actively search/read files:
 - Sampling/Elicitation (no LLM requests or user input from server side)
 - Streamable HTTP transport (stdio is sufficient for Claude Desktop)
 - Write operations (read-only by design)
+
+## Building
+
+```bash
+go build -o utilMCP ./src/
+go test ./src/
+```
 
 ## Claude Desktop Configuration
 
