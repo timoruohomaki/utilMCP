@@ -55,9 +55,56 @@ An MCP server can expose three types of capabilities:
 | **Tools** | Executable functions the LLM can invoke (with user approval) | `tools/list` | `tools/call` |
 | **Prompts** | Reusable interaction templates | `prompts/list` | `prompts/get` |
 
+## Design
+
+### Dependencies
+
+- [mcp-go](https://github.com/mark3labs/mcp-go) -- Go SDK for the Model Context Protocol
+
+### Scope
+
+- **Transport**: stdio only (local desktop use, no TLS/auth needed)
+- **Directory**: flat scan of the target folder (no recursion into subdirectories)
+- **Read-only**: no write operations; the server only exposes file contents
+- **File filtering**: binary files and excessively large files are skipped
+
+### manifest.json
+
+On startup, utilMCP scans the target folder and writes a `manifest.json` containing metadata for each eligible file:
+
+```json
+{
+  "files": [
+    {
+      "name": "example.txt",
+      "mimeType": "text/plain",
+      "size": 1024,
+      "lastModified": "2025-01-15T10:30:00Z"
+    }
+  ]
+}
+```
+
+This manifest is regenerated each time the server starts.
+
+### Resource URIs
+
+Files are exposed using `file:///` URIs pointing to their absolute paths on disk.
+
+### CLI Usage
+
+```
+utilMCP /path/to/folder [--monitor]
+```
+
+| Argument | Description |
+|---|---|
+| `/path/to/folder` | Required. The folder whose files to expose |
+| `--monitor` | Optional. Log all MCP requests and responses to stderr for debugging |
+
 ## Minimal Features for Claude Desktop Compatibility
 
-To function as a valid MCP server that Claude Desktop can connect to, utlMCP must implement:
+To function as a valid MCP server that Claude Desktop can connect to, utilMCP must implement:
 
 ### Required Protocol Methods
 
@@ -98,7 +145,20 @@ To use utilMCP with Claude Desktop, add it to `~/Library/Application Support/Cla
 }
 ```
 
-Claude Desktop will launch the binary as a subprocess and communicate over stdio.
+With monitoring enabled:
+
+```json
+{
+  "mcpServers": {
+    "utilMCP": {
+      "command": "/path/to/utilMCP",
+      "args": ["/path/to/folder/to/expose", "--monitor"]
+    }
+  }
+}
+```
+
+Claude Desktop will launch the binary as a subprocess and communicate over stdio. When `--monitor` is active, all JSON-RPC traffic is logged to stderr (visible in Claude Desktop's server logs at `~/Library/Logs/Claude/mcp-server-utilMCP.log`).
 
 ## License
 
